@@ -17,6 +17,8 @@ public:
 
 	enum {
 		MODEL_TEXT_DAVINCI, MODEL_TEXT_CURIE, MODEL_TEXT_BABBAGE, MODEL_TEXT_ADA,
+		MODEL_TEXTEDIT_DAVINCI,
+		MODEL_TEXTEMBED_ADA,
 		MODEL_CODE_DAVINCI, MODEL_CODE_CUSHMAN
 	};
 
@@ -26,13 +28,21 @@ public:
 	virtual ~gipOpenAI();
 
 	void initialize(std::string apiKey);
-	std::string getCompletion(std::string prompt, int maxTokens, int modelType = 0, int temperature = 0);
+
+	std::string getTextCompletion(std::string prompt, int maxTokens, int modelType = MODEL_TEXT_DAVINCI, int temperature = 0);
+	std::string getTextEdit(std::string input, std::string instruction, int modelType = MODEL_TEXTEDIT_DAVINCI);
+	std::string getTextEmbed(std::string input, int modelType = MODEL_TEXTEMBED_ADA);
+
 	std::vector<std::string> getImage(std::string prompt, int num = 1, std::string size = "256x256");
-	std::vector<std::string> getImageVariation(std::string fullPath, int num = 1, std::string size = "256x256");
+	std::vector<std::string> getImageBase64(std::string prompt, int num = 1, std::string size = "256x256");
+	std::vector<std::string> getImageVariation(std::string imageDataBase64, int num = 1, std::string size = "256x256");
+
+	std::string getCode(std::string prompt, int maxTokens, int modelType = MODEL_CODE_DAVINCI);
+
 
 private:
 	std::string apikey;
-	std::string modeltype[6];
+	std::string modeltype[7];
 };
 
 #endif /* SRC_GIPOPENAI_H_ */
