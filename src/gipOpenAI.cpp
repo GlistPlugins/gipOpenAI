@@ -15,8 +15,9 @@ gipOpenAI::gipOpenAI() {
 	modeltype[2] = "text-babbage-001";
 	modeltype[3] = "text-ada-001";
 	modeltype[4] = "text-davinci-edit-001";
-	modeltype[5] = "code-davinci-002";
-	modeltype[6] = "code-cushman-001";
+	modeltype[5] = "text-embedding-ada-002";
+	modeltype[6] = "code-davinci-002";
+	modeltype[7] = "code-cushman-001";
 }
 
 gipOpenAI::~gipOpenAI() {
@@ -35,8 +36,8 @@ std::string gipOpenAI::getTextCompletion(std::string prompt, int maxTokens, int 
 			{"temperature", temperature}
 	};
 	auto completion = openai::completion().create(j);
-	std::cout << "Response is:\n" << completion.dump(2) << '\n';
-	return completion.dump(2);
+//	std::cout << "Response is:\n" << completion.dump(2) << '\n';
+	return completion["choices"][0]["text"];
 }
 
 std::string gipOpenAI::getTextEdit(std::string input, std::string instruction, int modelType) {
@@ -47,7 +48,7 @@ std::string gipOpenAI::getTextEdit(std::string input, std::string instruction, i
 	};
 	auto edit = openai::edit().create(j);
 //	std::cout << "Response is:\n" << edit.dump(2) << '\n';
-	return edit.dump(2);
+	return edit["choices"][0]["text"];
 }
 
 std::string gipOpenAI::getTextEmbed(std::string input, int modelType) {
@@ -56,7 +57,7 @@ std::string gipOpenAI::getTextEmbed(std::string input, int modelType) {
 			{"input", input}
 	};
 	auto res = openai::embedding().create(j);
-//	std::cout << "Response is:\n" << res.dump(2) << '\n';
+	std::cout << "Response is:\n" << res.dump(2) << '\n';
 	return res.dump(2);
 }
 
@@ -108,5 +109,5 @@ std::string gipOpenAI::getCode(std::string prompt, int maxTokens, int modelType)
 	};
 	auto completion = openai::completion().create(j);
 //	std::cout << "Response is:\n" << completion.dump(2) << '\n';
-	return completion.dump(2);
+	return completion["choices"][0]["text"];
 }

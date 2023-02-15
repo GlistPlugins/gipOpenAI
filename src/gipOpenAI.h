@@ -42,7 +42,7 @@ public:
 
 private:
 	std::string apikey;
-	std::string modeltype[7];
+	std::string modeltype[8];
 };
 
 #endif /* SRC_GIPOPENAI_H_ */
