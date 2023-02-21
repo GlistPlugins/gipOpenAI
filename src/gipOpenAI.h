@@ -34,8 +34,7 @@ public:
 	std::string getTextEmbed(std::string input, int modelType = MODEL_TEXTEMBED_ADA);
 
 	std::vector<std::string> getImage(std::string prompt, int num = 1, std::string size = "256x256");
-	std::vector<std::string> getImageBase64(std::string prompt, int num = 1, std::string size = "256x256");
-	std::vector<std::string> getImageVariation(std::string imageDataBase64, int num = 1, std::string size = "256x256");
+	std::vector<std::string> getImageVariation(std::string imageFullPath, int num = 1, std::string size = "256x256");
 
 	std::string getCode(std::string prompt, int maxTokens, int modelType = MODEL_CODE_DAVINCI);
 
