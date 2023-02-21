@@ -6,6 +6,8 @@
  */
 
 #include "gipOpenAI.h"
+#include "gFile.h"
+#include "gImage.h"
 
 
 gipOpenAI::gipOpenAI() {
@@ -65,40 +67,44 @@ std::vector<std::string> gipOpenAI::getImage(std::string prompt, int num, std::s
 	Json j = {
 			{"prompt", prompt},
 			{"n", num},
-			{"size", size}
-	};
-    auto image = openai::image().create(j); // Using initializer lists
-//    std::cout << "Image URL is: " << image.dump(2) << '\n';
-    std::vector<std::string> urls;
-    for(int i = 0; i < num; i++) urls.push_back(image["data"][i]["url"]);
-    return urls;
-}
-
-std::vector<std::string> gipOpenAI::getImageBase64(std::string prompt, int num, std::string size) {
-	Json j = {
-			{"prompt", prompt},
-			{"n", num},
 			{"size", size},
 			{"response_format", "b64_json"}
 	};
     auto image = openai::image().create(j); // Using initializer lists
     std::vector<std::string> data;
-    for(int i = 0; i < num; i++) data.push_back(image["data"][i]["b64_json"]);
+    for(int i = 0; i < num; i++) {
+    	gFile ifile;
+    	ifile.load(gImage::generateDownloadedImagePath(), gFile::FILEMODE_WRITEONLY, true);
+    	ifile.write(gDecodeBase64(image["data"][i]["b64_json"]));
+    	data.push_back(ifile.getPath().string());
+    }
     return data;
 }
 
-std::vector<std::string> gipOpenAI::getImageVariation(std::string imageDataBase64, int num, std::string size) {
+std::vector<std::string> gipOpenAI::getImageVariation(std::string imageFullPath, int num, std::string size) {
+	gFile ifileo;
+	ifileo.load(imageFullPath, gFile::FILEMODE_READONLY, true);
+	std::vector<char> ibytes = ifileo.getBytes();
+//	gLogi("OAI") << "image fullpath:" << ifileo.getPath().string();
+//	gLogi("OAI") << "bytes:" << gEncodeBase64(ibytes.data(), ibytes.size());
 	Json j = {
-			{"image", imageDataBase64},
+			{"image", gEncodeBase64(ibytes.data(), ibytes.size())},
 			{"n", num},
-			{"size", size}
+			{"size", size},
+			{"response_format", "b64_json"}
 	};
+	ifileo.close();
 
     auto image = openai::image().variation(j);
-//    std::cout << "Image URL is: " << image.dump(2) << '\n';
-    std::vector<std::string> urls;
-    for(int i = 0; i < num; i++) urls.push_back(image["data"][i]["url"]);
-    return urls;
+    std::vector<std::string> data;
+    for(int i = 0; i < num; i++) {
+    	gFile ifile;
+    	ifile.load(gImage::generateDownloadedImagePath(), gFile::FILEMODE_WRITEONLY, true);
+    	ifile.write(gDecodeBase64(image["data"][i]["b64_json"]));
+    	data.push_back(ifile.getPath().string());
+    	ifile.close();
+    }
+    return data;
 }
 
 std::string gipOpenAI::getCode(std::string prompt, int maxTokens, int modelType) {
