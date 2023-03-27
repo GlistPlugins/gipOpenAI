@@ -33,7 +33,7 @@ void gipOpenAI::initialize(std::string apiKey) {
 }
 
 std::string gipOpenAI::getChatCompletion(std::string prompt, int maxTokens, int modelType, int temperature) {
-	Json messages = Json::array( {Json::object({{"role", "system"}, {"content", prompt}})} );
+	Json messages = Json::array( {Json::object({{"role", "user"}, {"content", prompt}})} );
 	Json j = {
 			{"model", modeltype[modelType]},
 			{"messages", messages},
