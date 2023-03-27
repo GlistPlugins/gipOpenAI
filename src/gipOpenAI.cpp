@@ -97,21 +97,16 @@ std::vector<std::string> gipOpenAI::getImage(std::string prompt, int num, std::s
 }
 
 std::vector<std::string> gipOpenAI::getImageVariation(std::string imageFullPath, int num, std::string size) {
-	gFile ifileo;
-	ifileo.load(imageFullPath, gFile::FILEMODE_READONLY, true);
-	std::vector<char> ibytes = ifileo.getBytes();
-//	gLogi("OAI") << "image fullpath:" << ifileo.getPath().string();
-//	gLogi("OAI") << "bytes:" << gEncodeBase64(ibytes.data(), ibytes.size());
 	Json j = {
 			{"image", imageFullPath},
-//			{"image", gEncodeBase64(ibytes.data(), ibytes.size())},
 			{"n", num},
 			{"size", size},
 			{"response_format", "b64_json"}
 	};
-	ifileo.close();
 
     auto image = openai::image().variation(j);
+//    std::cout << "Image response:\n" << image.dump(2) << '\n';
+
     std::vector<std::string> data;
     for(int i = 0; i < num; i++) {
     	gFile ifile;

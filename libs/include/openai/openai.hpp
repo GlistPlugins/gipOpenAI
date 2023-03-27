@@ -95,7 +95,8 @@ public:
 
     void setBody(const std::string& data);
     void setMultiformPart(const std::string& filepath, const std::string& purpose);
-    void setMultiformPart(const std::string& imageData);
+    void setMultiformPart(const std::string& imageData, int imageNum, const std::string& imageSize, const std::string& responseFormat);
+    std::string toStr(const int numValue);
     
     Response getPrepare();
     Response postPrepare(const std::string& contentType = "");
@@ -153,7 +154,13 @@ inline void Session::setMultiformPart(const std::string& filepath, const std::st
     }
 }
 
-inline void Session::setMultiformPart(const std::string& imageData) {
+inline std::string Session::toStr(const int numValue) {
+	std::ostringstream out;
+	out << numValue;
+	return out.str();
+}
+
+inline void Session::setMultiformPart(const std::string& imageData, int imageNum, const std::string& imageSize, const std::string& responseFormat) {
     // https://curl.se/libcurl/c/curl_mime_init.html
     if (curl_) {
         if (mime_form_ != nullptr) {
@@ -166,10 +173,20 @@ inline void Session::setMultiformPart(const std::string& imageData) {
 
         field = curl_mime_addpart(mime_form_);
         curl_mime_name(field, "image");
-//        curl_mime_data(field, imageData.c_str(), imageData.length());
         curl_mime_filedata(field, imageData.c_str());
-        curl_mime_encoder(field, "base64");
         curl_mime_type(field, "image/png");
+
+    	curl_mimepart *field2 = curl_mime_addpart(mime_form_);
+        curl_mime_name(field2, "n");
+        curl_mime_data(field2, toStr(imageNum).c_str(), CURL_ZERO_TERMINATED);
+
+        curl_mimepart *field3 = curl_mime_addpart(mime_form_);
+        curl_mime_name(field3, "size");
+        curl_mime_data(field3, imageSize.c_str(), CURL_ZERO_TERMINATED);
+
+        curl_mimepart *field4 = curl_mime_addpart(mime_form_);
+        curl_mime_name(field4, "response_format");
+        curl_mime_data(field4, responseFormat.c_str(), CURL_ZERO_TERMINATED);
 
         curl_easy_setopt(curl_, CURLOPT_MIMEPOST, mime_form_);
     }
@@ -396,7 +413,7 @@ public:
     void setThrowException(bool throw_exception) { throw_exception_ = throw_exception; }
 
     void setMultiformPart(const std::string& filepath, const std::string& purpose) { session_.setMultiformPart(filepath, purpose); }
-    void setMultiformPart(const std::string& imageData) { session_.setMultiformPart(imageData); }
+    void setMultiformPart(const std::string& imageData, int imageNum, const std::string& imageSize, const std::string& responseFormat) { session_.setMultiformPart(imageData, imageNum, imageSize, responseFormat); }
 
     Json post(const std::string& suffix, const std::string& data, const std::string& contentType) {
         setParameters(suffix, data, contentType);
@@ -650,7 +667,7 @@ inline Json CategoryImage::edit(Json input) {
 // POST https://api.openai.com/v1/images/variations
 // Creates a variation of a given image.
 inline Json CategoryImage::variation(Json input) {
-    openai_.setMultiformPart(input["image"].get<std::string>());
+    openai_.setMultiformPart(input["image"].get<std::string>(), input["n"], input["size"].get<std::string>(), input["response_format"].get<std::string>());
     return openai_.post("images/variations", input, "multipart/form-data");
 }
 
