@@ -95,6 +95,7 @@ public:
 
     void setBody(const std::string& data);
     void setMultiformPart(const std::string& filepath, const std::string& purpose);
+    void setMultiformPart(const std::string& imageData);
     
     Response getPrepare();
     Response postPrepare(const std::string& contentType = "");
@@ -152,6 +153,28 @@ inline void Session::setMultiformPart(const std::string& filepath, const std::st
     }
 }
 
+inline void Session::setMultiformPart(const std::string& imageData) {
+    // https://curl.se/libcurl/c/curl_mime_init.html
+    if (curl_) {
+        if (mime_form_ != nullptr) {
+            curl_mime_free(mime_form_);
+            mime_form_ = nullptr;
+        }
+        curl_mimepart *field = nullptr;
+
+        mime_form_ = curl_mime_init(curl_);
+
+        field = curl_mime_addpart(mime_form_);
+        curl_mime_name(field, "image");
+//        curl_mime_data(field, imageData.c_str(), imageData.length());
+        curl_mime_filedata(field, imageData.c_str());
+        curl_mime_encoder(field, "base64");
+        curl_mime_type(field, "image/png");
+
+        curl_easy_setopt(curl_, CURLOPT_MIMEPOST, mime_form_);
+    }
+}
+
 inline Response Session::getPrepare() {
     if (curl_) {
         curl_easy_setopt(curl_, CURLOPT_HTTPGET, 1L);
@@ -162,6 +185,11 @@ inline Response Session::getPrepare() {
 }
 
 inline Response Session::postPrepare(const std::string& contentType) {
+//    if (curl_) {
+//        curl_easy_setopt(curl_, CURLOPT_HTTPGET, 0L);
+//        curl_easy_setopt(curl_, CURLOPT_POST, 1L);
+//        curl_easy_setopt(curl_, CURLOPT_NOBODY, 0L);
+//    }
     return makeRequest(contentType);
 }
 
@@ -188,6 +216,8 @@ inline Response Session::makeRequest(const std::string& contentType) {
     if (!organization_.empty()) {
         headers = curl_slist_append(headers, std::string{"OpenAI-Organization: " + organization_}.c_str());
     }
+//    curl_easy_setopt(curl_, CURLOPT_HTTPGET, 0L);
+//    curl_easy_setopt(curl_, CURLOPT_POST, 1L);
     curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl_, CURLOPT_URL, url_.c_str());
     
@@ -232,6 +262,17 @@ struct CategoryModel {
     Json retrieve(const std::string& model);
 
     CategoryModel(OpenAI& openai) : openai_{openai} {}
+private:
+    OpenAI& openai_;
+};
+
+// https://beta.openai.com/docs/api-reference/chat
+// Given a prompt, the model will return one or more predicted chat completions.
+struct CategoryChat {
+    Json create(Json input);
+
+    CategoryChat(OpenAI& openai) : openai_{openai} {}
+
 private:
     OpenAI& openai_;
 };
@@ -347,7 +388,7 @@ public:
     OpenAI(const OpenAI&)               = delete;
     OpenAI& operator=(const OpenAI&)    = delete;
     OpenAI(OpenAI&&)                    = delete;
-    OpenAI& operator=(OpenAI&&)         = delete;
+//    OpenAI& operator=(OpenAI&&)         = delete;
 
     void setProxy(const std::string& url) { session_.setProxyUrl(url); }
 
@@ -355,6 +396,7 @@ public:
     void setThrowException(bool throw_exception) { throw_exception_ = throw_exception; }
 
     void setMultiformPart(const std::string& filepath, const std::string& purpose) { session_.setMultiformPart(filepath, purpose); }
+    void setMultiformPart(const std::string& imageData) { session_.setMultiformPart(imageData); }
 
     Json post(const std::string& suffix, const std::string& data, const std::string& contentType) {
         setParameters(suffix, data, contentType);
@@ -490,6 +532,7 @@ public:
     CategoryFile            file      {*this};
     CategoryFineTune        fine_tune {*this};
     CategoryModeration      moderation{*this};
+    CategoryChat 			chat      {*this};
     // CategoryEngine          engine{*this}; // Not handled since deprecated (use Model instead)
 
 private:
@@ -530,6 +573,10 @@ inline CategoryModel& model() {
 
 inline CategoryCompletion& completion() {
     return instance().completion;
+}
+
+inline CategoryChat& chat() {
+    return instance().chat;
 }
 
 inline CategoryEdit& edit() {
@@ -576,6 +623,12 @@ inline Json CategoryCompletion::create(Json input) {
     return openai_.post("completions", input);
 }
 
+// POST https://api.openai.com/v1/chat/completions
+// Creates a chat completion for the provided prompt and parameters
+inline Json CategoryChat::create(Json input) {
+    return openai_.post("chat/completions", input);
+}
+
 // POST https://api.openai.com/v1/edits
 // Creates a new edit for the provided input, instruction, and parameters
 inline Json CategoryEdit::create(Json input) {
@@ -597,7 +650,8 @@ inline Json CategoryImage::edit(Json input) {
 // POST https://api.openai.com/v1/images/variations
 // Creates a variation of a given image.
 inline Json CategoryImage::variation(Json input) {
-    return openai_.post("images/variations", input);
+    openai_.setMultiformPart(input["image"].get<std::string>());
+    return openai_.post("images/variations", input, "multipart/form-data");
 }
 
 inline Json CategoryEmbedding::create(Json input) { 
@@ -681,6 +735,7 @@ using _detail::embedding;
 using _detail::file;
 using _detail::fineTune;
 using _detail::moderation;
+using _detail::chat;
 
 using _detail::Json;
 

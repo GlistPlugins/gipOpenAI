@@ -12,14 +12,16 @@
 
 gipOpenAI::gipOpenAI() {
 	apikey = "";
-	modeltype[0] = "text-davinci-003";
-	modeltype[1] = "text-curie-001";
-	modeltype[2] = "text-babbage-001";
-	modeltype[3] = "text-ada-001";
-	modeltype[4] = "text-davinci-edit-001";
-	modeltype[5] = "text-embedding-ada-002";
-	modeltype[6] = "code-davinci-002";
-	modeltype[7] = "code-cushman-001";
+	modeltype[MODEL_CHAT_GPT40] = "gpt-4";
+	modeltype[MODEL_CHAT_GPT35TURBO] = "gpt-3.5-turbo";
+	modeltype[MODEL_TEXT_DAVINCI] = "text-davinci-003";
+	modeltype[MODEL_TEXT_CURIE] = "text-curie-001";
+	modeltype[MODEL_TEXT_BABBAGE] = "text-babbage-001";
+	modeltype[MODEL_TEXT_ADA] = "text-ada-001";
+	modeltype[MODEL_TEXTEDIT_DAVINCI] = "text-davinci-edit-001";
+	modeltype[MODEL_TEXTEMBED_ADA] = "text-embedding-ada-002";
+	modeltype[MODEL_CODE_DAVINCI] = "code-davinci-002";
+	modeltype[MODEL_CODE_CUSHMAN] = "code-cushman-001";
 }
 
 gipOpenAI::~gipOpenAI() {
@@ -28,6 +30,19 @@ gipOpenAI::~gipOpenAI() {
 void gipOpenAI::initialize(std::string apiKey) {
 	apikey = apiKey;
 	openai::start(apikey);
+}
+
+std::string gipOpenAI::getChatCompletion(std::string prompt, int maxTokens, int modelType, int temperature) {
+	Json messages = Json::array( {Json::object({{"role", "system"}, {"content", prompt}})} );
+	Json j = {
+			{"model", modeltype[modelType]},
+			{"messages", messages},
+			{"max_tokens", maxTokens},
+			{"temperature", temperature}
+	};
+	auto completion = openai::chat().create(j);
+//	std::cout << "Response is:\n" << completion.dump(2) << '\n';
+	return completion["choices"][0]["message"]["content"];
 }
 
 std::string gipOpenAI::getTextCompletion(std::string prompt, int maxTokens, int modelType, int temperature) {
@@ -88,7 +103,8 @@ std::vector<std::string> gipOpenAI::getImageVariation(std::string imageFullPath,
 //	gLogi("OAI") << "image fullpath:" << ifileo.getPath().string();
 //	gLogi("OAI") << "bytes:" << gEncodeBase64(ibytes.data(), ibytes.size());
 	Json j = {
-			{"image", gEncodeBase64(ibytes.data(), ibytes.size())},
+			{"image", imageFullPath},
+//			{"image", gEncodeBase64(ibytes.data(), ibytes.size())},
 			{"n", num},
 			{"size", size},
 			{"response_format", "b64_json"}
