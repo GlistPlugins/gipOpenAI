@@ -44,6 +44,7 @@ public:
 	std::vector<std::string> getImageVariation(std::string imageFullPath, int num = 1, std::string size = "256x256");
 
 	std::string getCode(std::string prompt, int maxTokens, int modelType = MODEL_CODE_DAVINCI);
+
 	/*
 	 * Fine tunes a model using the specified file.
 	 *
