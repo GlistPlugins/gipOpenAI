@@ -155,3 +155,15 @@ std::string gipOpenAI::getCompletion(std::string prompt, int maxTokens, std::str
     std::cout << "Response is:\n" << completion.dump(2) << '\n';
     return completion["choices"][0]["text"];
 }
+
+std::string gipOpenAI::getFineTunedCompletion(gipOpenAI::Json& retrieve, std::string prompt, int maxTokens, int temperature) {
+    Json j = {
+            {"model", retrieve["fine_tuned_model"]},
+            {"prompt", prompt},
+            {"max_tokens", maxTokens},
+            {"temperature", temperature}
+    };
+    auto completion = openai::completion().create(j);
+    std::cout << "Response is:\n" << completion.dump(2) << '\n';
+    return completion["choices"][0]["text"];
+}

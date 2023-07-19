@@ -72,6 +72,7 @@ public:
 	 */
 	std::string getCompletion(std::string prompt, int maxTokens, std::string modelType, int temperature = 0);
 
+	std::string getFineTunedCompletion(openai::Json& retrieve, std::string prompt, int maxTokens, int temperature = 0);
 
 private:
 	std::string apikey;
