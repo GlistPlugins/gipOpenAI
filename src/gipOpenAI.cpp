@@ -145,7 +145,8 @@ gipOpenAI::Json gipOpenAI::retrieveFineTunedModelContent(std::string fineTuneId)
 }
 
 gipOpenAI::Json gipOpenAI::getRetrieve(std::string fineTuneId) {
-	return retrieveFineTunedModelContent(fineTuneId);
+	retrieve = retrieveFineTunedModelContent(fineTuneId);
+	return retrieve;
 }
 
 std::string gipOpenAI::getCompletion(std::string prompt, int maxTokens, std::string modelType, int temperature) {
