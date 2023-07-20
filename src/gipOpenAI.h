@@ -61,6 +61,8 @@ public:
 	 */
 	Json retrieveFineTunedModelContent(std::string fineTuneId);
 
+	Json getRetrieve(std::string fineTuneId);
+
 	/*
 	 * Get a completion of a given prompt using a specific model type.
 	 *
