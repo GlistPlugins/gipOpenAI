@@ -45,6 +45,8 @@ public:
 
 	std::string getCode(std::string prompt, int maxTokens, int modelType = MODEL_CODE_DAVINCI);
 
+	std::string uploadFineTuneDateJson(std::string jsonFilePath);
+
 	/*
 	 * Fine tunes a model using the specified file.
 	 *
@@ -68,17 +70,16 @@ public:
 	 *
 	 * @param prompt The initial string to which the model should respond.
 	 * @param maxTokens The maximum length of the model’s response.
-	 * @param modelType The type of the model to be used for generating the completion.
 	 * @param temperature (Optional) The randomness of the model’s output. Default is 0.
 	 * @return The generated completion as a string.
 	 */
-	std::string getCompletion(std::string prompt, int maxTokens, std::string modelType, int temperature = 0);
-
 	std::string getFineTunedCompletion(std::string prompt, int maxTokens, int temperature = 0);
+
 
 private:
 	std::string apikey;
 	std::string modeltype[10];
+	std::string uploadedfileid;
 	Json retrieve;
 };
 
