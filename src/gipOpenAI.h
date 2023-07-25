@@ -61,6 +61,8 @@ public:
 	 */
 	Json retrieveFineTunedModelContent(std::string fineTuneId);
 
+	Json getRetrieve(std::string fineTuneId);
+
 	/*
 	 * Get a completion of a given prompt using a specific model type.
 	 *
@@ -72,10 +74,12 @@ public:
 	 */
 	std::string getCompletion(std::string prompt, int maxTokens, std::string modelType, int temperature = 0);
 
+	std::string getFineTunedCompletion(std::string prompt, int maxTokens, int temperature = 0);
 
 private:
 	std::string apikey;
 	std::string modeltype[10];
+	Json retrieve;
 };
 
 #endif /* SRC_GIPOPENAI_H_ */
