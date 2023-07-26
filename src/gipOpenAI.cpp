@@ -129,9 +129,9 @@ std::string gipOpenAI::getCode(std::string prompt, int maxTokens, int modelType)
 	return completion["choices"][0]["text"];
 }
 
-std::string gipOpenAI::uploadFineTuneDateJson(std::string jsonFilePath) {
+std::string gipOpenAI::uploadFineTuneDataJsonFile(std::string jsonFile) {
 	auto upload = openai::file().upload( {
-		{ "file", gGetFilesDir() + jsonFilePath },
+		{ "file", gGetFilesDir() + jsonFile },
 		{ "purpose", "fine-tune" }
 	});
 	uploadedfileid = upload["id"].get<std::string>();
