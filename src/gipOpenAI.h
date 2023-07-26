@@ -45,7 +45,7 @@ public:
 
 	std::string getCode(std::string prompt, int maxTokens, int modelType = MODEL_CODE_DAVINCI);
 
-	std::string uploadFineTuneDataJson(std::string jsonFilePath);
+	std::string uploadFineTuneDataJsonFile(std::string jsonFile);
 
 	/*
 	 * Fine tunes a model using the specified file.
