@@ -138,6 +138,9 @@ std::string gipOpenAI::uploadFineTuneDataJsonFile(std::string jsonFile) {
 	return uploadedfileid;
 }
 
+void gipOpenAI::deleteFile(std::string uploadedfileid) {
+	auto deletion = openai::file().del(uploadedfileid);
+}
 
 std::string gipOpenAI::fineTuneModel(std::string file) {
 	auto fineTune = openai::fineTune().create( {
