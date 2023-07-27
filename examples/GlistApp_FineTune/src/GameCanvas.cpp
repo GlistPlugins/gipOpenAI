@@ -24,7 +24,7 @@ void GameCanvas::setup() {
 		ai.initialize(apikey);
 
 		// Upload file
-		uploadedfileid = ai.uploadFineTuneDateJson("data.jsonl");
+		uploadedfileid = ai.uploadFineTuneDataJsonFile("data.jsonl");
 		fineTuneId = ai.fineTuneModel(uploadedfileid);
 		std::cout << "Fine-tune ID: " << fineTuneId << std::endl;
 	} catch (const std::exception &ex) {
@@ -45,8 +45,7 @@ void GameCanvas::update() {
 			std::string chat_response = ai.getFineTunedCompletion(chat_prompt, 20);
 			gLogi("GameCanvas") << "Chat response:" << chat_response;
 			// Delete file
-			auto deletion = openai::file().del(uploadedfileid);
-			std::cout << deletion.dump(2) << "\n\n";
+			ai.deleteFile(uploadedfileid);
 		}
 	} catch (const std::exception &ex) {
 
