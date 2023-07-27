@@ -24,7 +24,7 @@ void GameCanvas::setup() {
 		ai.initialize(apikey);
 
 		// Upload file
-		uploadedfileid = ai.uploadFineTuneDateJson("data.jsonl");
+		uploadedfileid = ai.uploadFineTuneDataJsonFile("data.jsonl");
 		fineTuneId = ai.fineTuneModel(uploadedfileid);
 		std::cout << "Fine-tune ID: " << fineTuneId << std::endl;
 	} catch (const std::exception &ex) {
