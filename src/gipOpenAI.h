@@ -92,7 +92,7 @@ public:
 	 * with larger batch sizes.
 	 * @return The result of the refine tuning process.
 	 */
-	std::string reFineTuneModel(std::string file, std::string modelName, int batchSize, float learningRateMultiplier);
+	std::string reFineTuneModel(std::string file, std::string modelName, int batchSize = 3, float learningRateMultiplier = 0.3f);
 
 	/*
 	 * Retrieves the content of a fine-tuned model with a given ID.
