@@ -64,9 +64,35 @@ public:
 	 * Fine tunes a model using the specified file.
 	 *
 	 * @param file The file to be used for fine tuning.
+	 * @param batchSize Defaults to ~0.2% of the number of examples in the training set, capped at 256.
+	 * The batch size is the number of training examples used to train a single forward and backward pass.
+	 * In general, we've found that larger batch sizes tend to work better for larger datasets.
+	 * @param learningRateMultiplier Defaults to 0.05, 0.1, or 0.2 depending on final batch_size.
+	 * The fine-tuning learning rate is the original learning rate used for pretraining multiplied by this
+	 * multiplier. We recommend experimenting with values in the range 0.02 to 0.2 to see what produces
+	 * the best results. Empirically, we've found that larger learning rates often perform better
+	 * with larger batch sizes.
 	 * @return The result of the fine tuning process.
 	 */
-	std::string fineTuneModel(std::string file);
+	std::string fineTuneModel(std::string file, int batchSize = 3, float learningRateMultiplier = 0.3f);
+
+	/*
+	 * Continue fine-tuning a previously fine-tuned model with new data without needing
+	 * to start from the beginning.
+	 *
+	 * @param file The file to be used for continue fine tuning.
+	 * @param modelName The previously finetuned model's name such as "davinci:ft-personal-2023-08-15-07-26-45"
+	 * @param batchSize Defaults to ~0.2% of the number of examples in the training set, capped at 256.
+	 * The batch size is the number of training examples used to train a single forward and backward pass.
+	 * In general, we've found that larger batch sizes tend to work better for larger datasets.
+	 * @param learningRateMultiplier Defaults to 0.05, 0.1, or 0.2 depending on final batch_size.
+	 * The fine-tuning learning rate is the original learning rate used for pretraining multiplied by this
+	 * multiplier. We recommend experimenting with values in the range 0.02 to 0.2 to see what produces
+	 * the best results. Empirically, we've found that larger learning rates often perform better
+	 * with larger batch sizes.
+	 * @return The result of the refine tuning process.
+	 */
+	std::string reFineTuneModel(std::string file, std::string modelName, int batchSize, float learningRateMultiplier);
 
 	/*
 	 * Retrieves the content of a fine-tuned model with a given ID.
