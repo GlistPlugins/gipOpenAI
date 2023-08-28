@@ -67,6 +67,7 @@ public:
 	 * @return The result of the fine tuning process.
 	 */
 	std::string fineTuneModel(std::string file);
+	std::string reFineTuneModel(std::string file, std::string modelName);
 
 	/*
 	 * Retrieves the content of a fine-tuned model with a given ID.

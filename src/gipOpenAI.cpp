@@ -153,6 +153,18 @@ std::string gipOpenAI::fineTuneModel(std::string file) {
 	return fineTune["id"].get<std::string>();
 }
 
+std::string gipOpenAI::reFineTuneModel(std::string file, std::string modelName) {
+	auto fineTune = openai::fineTune().create( {
+		{ "training_file", file},
+		{"model", modelName},
+		{"n_epochs", 15},
+		{"batch_size", 3},
+		{"learning_rate_multiplier", 0.3},
+	});
+	return fineTune["id"].get<std::string>();
+
+}
+
 gipOpenAI::Json gipOpenAI::retrieveFineTunedModelContent(std::string fineTuneId) {
 	return openai::fineTune().retrieve(fineTuneId);
 }
