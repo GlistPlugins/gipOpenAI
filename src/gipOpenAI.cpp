@@ -142,15 +142,25 @@ void gipOpenAI::deleteFile(std::string uploadedfileid) {
 	auto deletion = openai::file().del(uploadedfileid);
 }
 
-std::string gipOpenAI::fineTuneModel(std::string file) {
+std::string gipOpenAI::fineTuneModel(std::string file, int batchSize, float learningRateMultiplier) {
 	auto fineTune = openai::fineTune().create( {
 		{ "training_file", file },
 		{"model", "davinci"},
-		{"n_epochs", 15},
-		{"batch_size", 3},
-		{"learning_rate_multiplier", 0.3},
+		{"batch_size", batchSize},
+		{"learning_rate_multiplier", learningRateMultiplier},
 	});
 	return fineTune["id"].get<std::string>();
+}
+
+std::string gipOpenAI::reFineTuneModel(std::string file, std::string modelName, int batchSize, float learningRateMultiplier) {
+	auto fineTune = openai::fineTune().create( {
+		{ "training_file", file},
+		{"model", modelName},
+		{"batch_size", batchSize},
+		{"learning_rate_multiplier", learningRateMultiplier},
+	});
+	return fineTune["id"].get<std::string>();
+
 }
 
 gipOpenAI::Json gipOpenAI::retrieveFineTunedModelContent(std::string fineTuneId) {
