@@ -80,10 +80,10 @@ std::string gipOpenAI::getTextEmbed(std::string input, int modelType) {
 
 std::vector<std::string> gipOpenAI::getImage(std::string prompt, int num, std::string size) {
 	Json j = {
-			{"prompt", prompt},
-			{"n", num},
-			{"size", size},
-			{"response_format", "b64_json"}
+	    {"model", "gpt-image-1"},
+	    {"prompt", prompt},
+	    {"n", num},
+	    {"size", size}
 	};
     auto image = openai::image().create(j); // Using initializer lists
     std::vector<std::string> data;
