@@ -42,6 +42,7 @@ public:
 
 	std::vector<std::string> getImage(std::string prompt, int num = 1, std::string size = "256x256");
 	std::vector<std::string> getImageVariation(std::string imageFullPath, int num = 1, std::string size = "256x256");
+	std::vector<std::string> getImageEdit(std::string imageFullPath, std::string prompt, int num = 1, std::string size = "1024x1024");
 
 	std::string getCode(std::string prompt, int maxTokens, int modelType = MODEL_CODE_DAVINCI);
 
