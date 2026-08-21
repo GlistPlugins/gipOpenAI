@@ -118,6 +118,28 @@ std::vector<std::string> gipOpenAI::getImageVariation(std::string imageFullPath,
     return data;
 }
 
+std::vector<std::string> gipOpenAI::getImageEdit(std::string imageFullPath, std::string prompt, int num, std::string size) {
+	Json j = {
+			{"model", "gpt-image-1"},
+			{"image", imageFullPath},
+			{"prompt", prompt},
+			{"n", num},
+			{"size", size}
+	};
+
+    auto image = openai::image().edit(j);
+
+    std::vector<std::string> data;
+    for(int i = 0; i < num; i++) {
+    	gFile ifile;
+    	ifile.load(gImage::generateDownloadedImagePath(), gFile::FILEMODE_WRITEONLY, true);
+    	ifile.write(gDecodeBase64(image["data"][i]["b64_json"]));
+    	data.push_back(ifile.getPath().string());
+    	ifile.close();
+    }
+    return data;
+}
+
 std::string gipOpenAI::getCode(std::string prompt, int maxTokens, int modelType) {
 	Json j = {
 			{"model", modeltype[modelType]},

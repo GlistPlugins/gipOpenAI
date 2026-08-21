@@ -96,6 +96,7 @@ public:
     void setBody(const std::string& data);
     void setMultiformPart(const std::string& filepath, const std::string& purpose);
     void setMultiformPart(const std::string& imageData, int imageNum, const std::string& imageSize, const std::string& responseFormat);
+    void setMultiformPart(const std::string& imageData, const std::string& prompt, const std::string& model, int imageNum, const std::string& imageSize);
     std::string toStr(const int numValue);
     
     Response getPrepare();
@@ -192,6 +193,42 @@ inline void Session::setMultiformPart(const std::string& imageData, int imageNum
     }
 }
 
+inline void Session::setMultiformPart(const std::string& imageData, const std::string& prompt, const std::string& model, int imageNum, const std::string& imageSize) {
+    // https://curl.se/libcurl/c/curl_mime_init.html
+    if (curl_) {
+        if (mime_form_ != nullptr) {
+            curl_mime_free(mime_form_);
+            mime_form_ = nullptr;
+        }
+        curl_mimepart *field = nullptr;
+
+        mime_form_ = curl_mime_init(curl_);
+
+        field = curl_mime_addpart(mime_form_);
+        curl_mime_name(field, "image");
+        curl_mime_filedata(field, imageData.c_str());
+        curl_mime_type(field, "image/png");
+
+        curl_mimepart *field2 = curl_mime_addpart(mime_form_);
+        curl_mime_name(field2, "prompt");
+        curl_mime_data(field2, prompt.c_str(), CURL_ZERO_TERMINATED);
+
+        curl_mimepart *field3 = curl_mime_addpart(mime_form_);
+        curl_mime_name(field3, "model");
+        curl_mime_data(field3, model.c_str(), CURL_ZERO_TERMINATED);
+
+        curl_mimepart *field4 = curl_mime_addpart(mime_form_);
+        curl_mime_name(field4, "n");
+        curl_mime_data(field4, toStr(imageNum).c_str(), CURL_ZERO_TERMINATED);
+
+        curl_mimepart *field5 = curl_mime_addpart(mime_form_);
+        curl_mime_name(field5, "size");
+        curl_mime_data(field5, imageSize.c_str(), CURL_ZERO_TERMINATED);
+
+        curl_easy_setopt(curl_, CURLOPT_MIMEPOST, mime_form_);
+    }
+}
+
 inline Response Session::getPrepare() {
     if (curl_) {
         curl_easy_setopt(curl_, CURLOPT_HTTPGET, 1L);
@@ -224,9 +261,14 @@ inline Response Session::makeRequest(const std::string& contentType) {
     
     struct curl_slist* headers = NULL;
     if (!contentType.empty()) {
-        headers = curl_slist_append(headers, std::string{"Content-Type: " + contentType}.c_str());
         if (contentType == "multipart/form-data") {
+            // Do not set Content-Type manually here: curl_mime (CURLOPT_MIMEPOST)
+            // generates its own Content-Type header with the correct boundary.
+            // Overriding it without a boundary breaks the multipart body.
             headers = curl_slist_append(headers, "Expect:");
+        }
+        else {
+            headers = curl_slist_append(headers, std::string{"Content-Type: " + contentType}.c_str());
         }
     }
     headers = curl_slist_append(headers, std::string{"Authorization: Bearer " + token_}.c_str());
@@ -414,11 +456,12 @@ public:
 
     void setMultiformPart(const std::string& filepath, const std::string& purpose) { session_.setMultiformPart(filepath, purpose); }
     void setMultiformPart(const std::string& imageData, int imageNum, const std::string& imageSize, const std::string& responseFormat) { session_.setMultiformPart(imageData, imageNum, imageSize, responseFormat); }
+    void setMultiformPart(const std::string& imageData, const std::string& prompt, const std::string& model, int imageNum, const std::string& imageSize) { session_.setMultiformPart(imageData, prompt, model, imageNum, imageSize); }
 
     Json post(const std::string& suffix, const std::string& data, const std::string& contentType) {
         setParameters(suffix, data, contentType);
         auto response = session_.postPrepare(contentType);
-        if (response.is_error){ 
+        if (response.is_error){
             trigger_error(response.error_message);
         }
 
@@ -661,7 +704,8 @@ inline Json CategoryImage::create(Json input) {
 // POST https://api.openai.com/v1/images/edits
 // Creates an edited or extended image given an original image and a prompt.
 inline Json CategoryImage::edit(Json input) {
-    return openai_.post("images/edits", input);
+    openai_.setMultiformPart(input["image"].get<std::string>(), input["prompt"].get<std::string>(), input["model"].get<std::string>(), input["n"], input["size"].get<std::string>());
+    return openai_.post("images/edits", input, "multipart/form-data");
 }
 
 // POST https://api.openai.com/v1/images/variations
